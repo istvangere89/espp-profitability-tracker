@@ -88,7 +88,7 @@ class WafStack(Stack):
                 cloud_watch_metrics_enabled=True,
                 metric_name="StockTrackerWebACL"
             ),
-            description="WAF protection for Stock Tracker CloudFront (rate limiting + common exploits)"
+            description="WAF protection for Stock Tracker CloudFront - rate limiting and common exploits"
         )
 
         # ========================================
