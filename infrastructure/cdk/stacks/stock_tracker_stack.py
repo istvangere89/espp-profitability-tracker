@@ -102,33 +102,14 @@ class StockTrackerStack(Stack):
             )
         )
 
-        # Add Lambda integration
+        # Add Lambda integration (proxy=True passes query params and full event)
         proxy_integration = apigateway.LambdaIntegration(
             cors_proxy_lambda,
-            proxy=False,
-            integration_responses=[
-                apigateway.IntegrationResponse(
-                    status_code="200",
-                    response_parameters={
-                        "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    }
-                )
-            ]
+            proxy=True  # Enable Lambda proxy integration to pass query parameters
         )
 
         # Add GET method
-        api.root.add_method(
-            "GET",
-            proxy_integration,
-            method_responses=[
-                apigateway.MethodResponse(
-                    status_code="200",
-                    response_parameters={
-                        "method.response.header.Access-Control-Allow-Origin": True
-                    }
-                )
-            ]
-        )
+        api.root.add_method("GET", proxy_integration)
 
         # ========================================
         # S3 Bucket for Static Website
