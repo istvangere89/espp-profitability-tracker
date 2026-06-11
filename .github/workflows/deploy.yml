@@ -143,12 +143,13 @@ jobs:
         working-directory: infrastructure/cdk
         run: |
           echo "📊 Deployment Outputs:"
-          cdk output
-          
           echo ""
           echo "🎉 Deployment complete!"
-          echo "Website URL: $(jq -r '.EpamStockTrackerStack.WebsiteURL' outputs.json)"
-          echo "API Gateway URL: $(jq -r '.EpamStockTrackerStack.ApiUrlForConfig' outputs.json)"
+          echo ""
+          echo "📍 Website URL: $(jq -r '.EpamStockTrackerStack.WebsiteURL' outputs.json)"
+          echo "🔌 API Gateway URL: $(jq -r '.EpamStockTrackerStack.ApiUrlForConfig' outputs.json)"
+          echo "📦 S3 Bucket: $(jq -r '.EpamStockTrackerStack.S3BucketName' outputs.json)"
+          echo "🛡️  WAF ARN: $(jq -r '.EpamStockTrackerWafStack.WAFWebACLArn' outputs.json)"
       
       - name: Upload outputs artifact
         uses: actions/upload-artifact@v4
