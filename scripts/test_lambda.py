@@ -5,9 +5,14 @@ Tests the Lambda handler without deploying to AWS
 
 import sys
 import json
+import os
 
 # Add the lambda function path to Python path
-sys.path.insert(0, '../infrastructure/lambda/cors_proxy')
+# Handle both running from scripts/ directory and from repository root
+script_dir = os.path.dirname(os.path.abspath(__file__))
+repo_root = os.path.dirname(script_dir)
+lambda_path = os.path.join(repo_root, 'infrastructure', 'lambda', 'cors_proxy')
+sys.path.insert(0, lambda_path)
 
 from index import handler
 
