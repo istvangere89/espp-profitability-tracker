@@ -40,6 +40,10 @@ jobs:
         run: |
           python scripts/test_lambda.py
       
+      - name: Run infrastructure tests
+        run: |
+          python scripts/test_infrastructure.py
+      
       - name: Validate Python syntax
         run: |
           python -m py_compile scripts/deploy.py
