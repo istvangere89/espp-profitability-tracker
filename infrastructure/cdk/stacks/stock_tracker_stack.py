@@ -38,7 +38,7 @@ class StockTrackerStack(Stack):
             self, "CorsProxyFunction",
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler="index.handler",
-            code=lambda_.Code.from_asset("../../lambda/cors_proxy"),
+            code=lambda_.Code.from_asset("../lambda/cors_proxy"),
             timeout=Duration.seconds(30),
             memory_size=256,
             description="CORS proxy for stock and currency APIs"
@@ -141,7 +141,7 @@ class StockTrackerStack(Stack):
                     name="RateLimitRule",
                     priority=1,
                     statement=wafv2.CfnWebACL.StatementProperty(
-                        rate_based_statement=wafv2.CfnWebACL.RatBasedStatementProperty(
+                        rate_based_statement=wafv2.CfnWebACL.RateBasedStatementProperty(
                             limit=100,  # 100 requests per 5 minutes
                             aggregate_key_type="IP"
                         )
@@ -241,7 +241,7 @@ class StockTrackerStack(Stack):
         # ========================================
         s3deploy.BucketDeployment(
             self, "DeployWebsite",
-            sources=[s3deploy.Source.asset("../../../src")],
+            sources=[s3deploy.Source.asset("../../src")],
             destination_bucket=website_bucket,
             distribution=distribution,
             distribution_paths=["/*"]

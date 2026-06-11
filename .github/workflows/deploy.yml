@@ -48,6 +48,21 @@ jobs:
           python -m py_compile infrastructure/cdk/app.py
           python -m py_compile infrastructure/cdk/stacks/stock_tracker_stack.py
           python -m py_compile infrastructure/lambda/cors_proxy/index.py
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install AWS CDK
+        run: |
+          npm install -g aws-cdk
+          cdk --version
+      
+      - name: CDK Synth
+        working-directory: infrastructure/cdk
+        run: |
+          cdk synth
 
   deploy:
     name: Deploy to AWS
