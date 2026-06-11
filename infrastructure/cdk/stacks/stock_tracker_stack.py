@@ -150,21 +150,11 @@ class StockTrackerStack(Stack):
         # Note: WAF for CloudFront requires us-east-1 region
         # Since we're deploying to eu-central-1, WAF is disabled
         # To enable WAF, you would need a separate stack in us-east-1
-        
-        origin_access_identity = cloudfront.OriginAccessIdentity(
-            self, "OAI",
-            comment="OAI for Stock Tracker website"
-        )
-
-        website_bucket.grant_read(origin_access_identity)
 
         # Build CloudFront distribution configuration
         distribution_props = {
             "default_behavior": cloudfront.BehaviorOptions(
-                origin=origins.S3Origin(
-                    website_bucket,
-                    origin_access_identity=origin_access_identity
-                ),
+                origin=origins.S3BucketOrigin(website_bucket),
                 viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                 allowed_methods=cloudfront.AllowedMethods.ALLOW_GET_HEAD,
                 cached_methods=cloudfront.CachedMethods.CACHE_GET_HEAD,
@@ -191,6 +181,8 @@ class StockTrackerStack(Stack):
             self, "WebsiteDistribution",
             **distribution_props
         )
+
+        # Note: S3BucketOrigin automatically creates OAC and sets up bucket permissions
 
         # ========================================
         # Deploy Website Files to S3
