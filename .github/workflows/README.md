@@ -17,7 +17,7 @@ This directory contains automated CI/CD workflows for the EPAM Stock Tracker.
 4. **Redeploy** - Pushes updated frontend to S3/CloudFront
 5. **Notify** - Reports deployment status
 
-**Required Secrets:**
+**Required Variables:**
 - `AWS_GITHUB_ROLE_ARN` - ARN of the OIDC role for AWS authentication
 
 **Environment:**
@@ -90,13 +90,15 @@ aws iam attach-role-policy \
 # Or create a more restrictive custom policy
 ```
 
-### 3. Add Secret to GitHub
+### 3. Add Variable to GitHub
 
-1. Go to: https://github.com/istvangere89/espp-profitability-tracker/settings/secrets/actions
-2. Click "New repository secret"
+1. Go to: https://github.com/istvangere89/espp-profitability-tracker/settings/variables/actions
+2. Click "New repository variable"
 3. Name: `AWS_GITHUB_ROLE_ARN`
 4. Value: `arn:aws:iam::<ACCOUNT_ID>:role/GitHubActionsDeployRole`
-5. Click "Add secret"
+5. Click "Add variable"
+
+Note: Using a variable instead of a secret is fine for role ARNs as they are not sensitive.
 
 ### 4. Enable GitHub Actions
 
@@ -145,10 +147,11 @@ The workflows use these environment variables:
 - **Short-lived tokens** - Expire after job completes
 - **Scoped permissions** - Role limited to this repository
 
-### Secrets Management
-- `AWS_GITHUB_ROLE_ARN` stored encrypted in GitHub
-- Never logged or exposed in workflow runs
-- Only accessible to workflows in this repository
+### Variables Management
+- `AWS_GITHUB_ROLE_ARN` stored as repository variable
+- Role ARNs are not sensitive (they identify resources but don't grant access)
+- Visible in workflow logs (safe, as ARNs are public identifiers)
+- Only OIDC trust relationship grants actual access
 
 ### Branch Protection
 Consider enabling:
@@ -164,7 +167,7 @@ Consider enabling:
 - Ensure trust policy matches repository
 
 ### "Role not found"
-- Confirm secret `AWS_GITHUB_ROLE_ARN` is set
+- Confirm variable `AWS_GITHUB_ROLE_ARN` is set
 - Verify OIDC provider exists in AWS account
 - Check role exists in correct AWS account
 
