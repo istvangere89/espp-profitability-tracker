@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPAM Stock Tracker - HUF</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📈 EPAM Stock Purchase Tracker</h1>
+            <p class="subtitle">Track your company stock purchases in HUF</p>
+        </header>
+
+        <!-- Portfolio Summary Dashboard -->
+        <section class="dashboard">
+            <div class="summary-card">
+                <h2>Portfolio Summary</h2>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="label">Current Stock Price</span>
+                        <span class="value" id="currentPrice">Loading...</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">USD/HUF Rate</span>
+                        <span class="value" id="exchangeRate">Loading...</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Total Shares</span>
+                        <span class="value" id="totalShares">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Total Contributed</span>
+                        <span class="value" id="totalContributed">0 HUF</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Current Value</span>
+                        <span class="value" id="currentValue">0 HUF</span>
+                    </div>
+                    <div class="summary-item highlight">
+                        <span class="label">Total Profit/Loss</span>
+                        <span class="value" id="totalProfitLoss">0 HUF (0%)</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button id="refreshBtn" class="btn btn-primary">🔄 Refresh Prices</button>
+                    <span class="last-update">Last updated: <span id="lastUpdate">Never</span></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Add Purchase Form -->
+        <section class="form-section">
+            <h2>➕ Add Purchase Record</h2>
+            <form id="purchaseForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="purchaseDate">Purchase Date</label>
+                        <input type="date" id="purchaseDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hufContributed">HUF Contributed</label>
+                        <input type="number" id="hufContributed" step="0.01" min="0" placeholder="500000" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sharesReceived">Shares Received <span class="optional">(optional)</span></label>
+                        <input type="number" id="sharesReceived" step="0.0001" min="0" placeholder="Auto-calculated if empty">
+                        <small>Leave empty to auto-calculate based on HUF amount</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="purchasePriceUSD">Purchase Price (USD) <span class="optional">(optional)</span></label>
+                        <input type="number" id="purchasePriceUSD" step="0.01" min="0" placeholder="Auto-calculated if empty">
+                        <small>Leave empty to fetch historical price with 15% ESPP discount</small>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">Add Purchase</button>
+                    <button type="reset" class="btn btn-secondary">Clear Form</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Purchase History Table -->
+        <section class="history-section">
+            <div class="section-header">
+                <h2>📊 Purchase History</h2>
+                <div class="history-actions">
+                    <button id="exportBtn" class="btn btn-outline">📥 Export CSV</button>
+                    <label for="importFile" class="btn btn-outline">📤 Import CSV
+                        <input type="file" id="importFile" accept=".csv" style="display: none;">
+                    </label>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="purchaseTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>HUF Contributed</th>
+                            <th>Shares</th>
+                            <th>Purchase Price (USD)</th>
+                            <th title="Market price before 15% ESPP discount">Fair Price (USD)</th>
+                            <th>Cost/Share (HUF)</th>
+                            <th>Current Value (HUF)</th>
+                            <th>Profit/Loss</th>
+                            <th>Profit/Loss %</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="purchaseTableBody">
+                        <tr class="empty-state">
+                            <td colspan="10">No purchase records yet. Add your first purchase above!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>💡 Tip: Export your data regularly for backup</p>
+            <p>⚠️ This tool is for personal tracking only. Not financial advice.</p>
+        </footer>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Load JavaScript modules -->
+    <script src="js/storage.js"></script>
+    <script src="js/calculator.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
