@@ -27,7 +27,7 @@ const API = {
             // Method 1: Try Yahoo Finance query via local proxy
             const symbol = 'EPAM';
             const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`;
-            const proxyUrl = `http://localhost:8080?url=${encodeURIComponent(yahooUrl)}`;
+            const proxyUrl = `https://5m16c2qhoc.execute-api.eu-central-1.amazonaws.com/prod/?url=${encodeURIComponent(yahooUrl)}`;
             const response = await fetch(proxyUrl, {
                 method: 'GET'
             });
@@ -88,7 +88,7 @@ const API = {
         const symbol = 'EPAM';
         
         const avUrl = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
-        const proxyUrl = `http://localhost:8080?url=${encodeURIComponent(avUrl)}`;
+        const proxyUrl = `https://5m16c2qhoc.execute-api.eu-central-1.amazonaws.com/prod/?url=${encodeURIComponent(avUrl)}`;
         const response = await fetch(proxyUrl);
 
         if (!response.ok) {
@@ -129,7 +129,7 @@ const API = {
         try {
             // Using local proxy for reliability
             const exchangeUrl = 'https://api.exchangerate-api.com/v4/latest/USD';
-            const proxyUrl = `http://localhost:8080?url=${encodeURIComponent(exchangeUrl)}`;
+            const proxyUrl = `https://5m16c2qhoc.execute-api.eu-central-1.amazonaws.com/prod/?url=${encodeURIComponent(exchangeUrl)}`;
             const response = await fetch(proxyUrl);
 
             if (!response.ok) {
@@ -182,7 +182,7 @@ const API = {
      */
     async getExchangeRateFallback() {
         const frankfurterUrl = 'https://api.frankfurter.app/latest?from=USD&to=HUF';
-        const proxyUrl = `http://localhost:8080?url=${encodeURIComponent(frankfurterUrl)}`;
+        const proxyUrl = `https://5m16c2qhoc.execute-api.eu-central-1.amazonaws.com/prod/?url=${encodeURIComponent(frankfurterUrl)}`;
         const response = await fetch(proxyUrl);
 
         if (!response.ok) {
@@ -225,7 +225,7 @@ const API = {
             const period2 = period1 + 86400; // Add one day
             
             const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?period1=${period1}&period2=${period2}&interval=1d`;
-            const proxyUrl = `http://localhost:8080?url=${encodeURIComponent(yahooUrl)}`;
+            const proxyUrl = `https://5m16c2qhoc.execute-api.eu-central-1.amazonaws.com/prod/?url=${encodeURIComponent(yahooUrl)}`;
             
             const response = await fetch(proxyUrl);
             
@@ -264,7 +264,7 @@ const API = {
         try {
             // Using frankfurter.app for historical rates (free and reliable)
             const frankfurterUrl = `https://api.frankfurter.app/${date}?from=USD&to=HUF`;
-            const proxyUrl = `http://localhost:8080?url=${encodeURIComponent(frankfurterUrl)}`;
+            const proxyUrl = `https://5m16c2qhoc.execute-api.eu-central-1.amazonaws.com/prod/?url=${encodeURIComponent(frankfurterUrl)}`;
             
             const response = await fetch(proxyUrl);
             
