@@ -1,7 +1,7 @@
 """
 CDK Stack for EPAM Stock Tracker
 - S3 bucket for static website hosting
-- CloudFront distribution with WAF
+- CloudFront distribution
 - Lambda function for CORS proxy
 - API Gateway with throttling (10-25 users)
 - CloudWatch alarms for monitoring
@@ -19,7 +19,6 @@ from aws_cdk import (
     aws_cloudwatch as cloudwatch,
     aws_cloudwatch_actions as cw_actions,
     aws_sns as sns,
-    aws_wafv2 as wafv2,
     CfnOutput,
     RemovalPolicy,
     Duration
@@ -28,7 +27,7 @@ from constructs import Construct
 
 
 class StockTrackerStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, waf_acl_arn: str = None, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # ========================================
@@ -124,83 +123,11 @@ class StockTrackerStack(Stack):
         )
 
         # ========================================
-        # CloudFront Distribution with WAF
+        # CloudFront Distribution
         # ========================================
-        
-        # Create basic WAF WebACL for CloudFront
-        # Note: WAF for CloudFront must be in us-east-1
-        waf_web_acl = wafv2.CfnWebACL(
-            self, "CloudFrontWebACL",
-            scope="CLOUDFRONT",  # Must be CLOUDFRONT for CloudFront distributions
-            default_action=wafv2.CfnWebACL.DefaultActionProperty(
-                allow={}  # Allow by default
-            ),
-            rules=[
-                # Rule 1: Rate limiting (100 requests per 5 minutes per IP)
-                wafv2.CfnWebACL.RuleProperty(
-                    name="RateLimitRule",
-                    priority=1,
-                    statement=wafv2.CfnWebACL.StatementProperty(
-                        rate_based_statement=wafv2.CfnWebACL.RateBasedStatementProperty(
-                            limit=100,  # 100 requests per 5 minutes
-                            aggregate_key_type="IP"
-                        )
-                    ),
-                    action=wafv2.CfnWebACL.RuleActionProperty(
-                        block={}  # Block if rate limit exceeded
-                    ),
-                    visibility_config=wafv2.CfnWebACL.VisibilityConfigProperty(
-                        sampled_requests_enabled=True,
-                        cloud_watch_metrics_enabled=True,
-                        metric_name="RateLimitRule"
-                    )
-                ),
-                # Rule 2: AWS Managed Rules - Core Rule Set (basic protection)
-                wafv2.CfnWebACL.RuleProperty(
-                    name="AWSManagedRulesCommonRuleSet",
-                    priority=2,
-                    statement=wafv2.CfnWebACL.StatementProperty(
-                        managed_rule_group_statement=wafv2.CfnWebACL.ManagedRuleGroupStatementProperty(
-                            vendor_name="AWS",
-                            name="AWSManagedRulesCommonRuleSet"
-                        )
-                    ),
-                    override_action=wafv2.CfnWebACL.OverrideActionProperty(
-                        none={}  # Use rule group's actions
-                    ),
-                    visibility_config=wafv2.CfnWebACL.VisibilityConfigProperty(
-                        sampled_requests_enabled=True,
-                        cloud_watch_metrics_enabled=True,
-                        metric_name="AWSManagedRulesCommonRuleSet"
-                    )
-                ),
-                # Rule 3: AWS Managed Rules - Known Bad Inputs
-                wafv2.CfnWebACL.RuleProperty(
-                    name="AWSManagedRulesKnownBadInputsRuleSet",
-                    priority=3,
-                    statement=wafv2.CfnWebACL.StatementProperty(
-                        managed_rule_group_statement=wafv2.CfnWebACL.ManagedRuleGroupStatementProperty(
-                            vendor_name="AWS",
-                            name="AWSManagedRulesKnownBadInputsRuleSet"
-                        )
-                    ),
-                    override_action=wafv2.CfnWebACL.OverrideActionProperty(
-                        none={}
-                    ),
-                    visibility_config=wafv2.CfnWebACL.VisibilityConfigProperty(
-                        sampled_requests_enabled=True,
-                        cloud_watch_metrics_enabled=True,
-                        metric_name="AWSManagedRulesKnownBadInputsRuleSet"
-                    )
-                )
-            ],
-            visibility_config=wafv2.CfnWebACL.VisibilityConfigProperty(
-                sampled_requests_enabled=True,
-                cloud_watch_metrics_enabled=True,
-                metric_name="StockTrackerWebACL"
-            ),
-            description="Basic WAF protection for Stock Tracker (rate limiting + common exploits)"
-        )
+        # Note: WAF for CloudFront requires us-east-1 region
+        # Since we're deploying to eu-central-1, WAF is disabled
+        # To enable WAF, you would need a separate stack in us-east-1
         
         origin_access_identity = cloudfront.OriginAccessIdentity(
             self, "OAI",
@@ -209,9 +136,9 @@ class StockTrackerStack(Stack):
 
         website_bucket.grant_read(origin_access_identity)
 
-        distribution = cloudfront.Distribution(
-            self, "WebsiteDistribution",
-            default_behavior=cloudfront.BehaviorOptions(
+        # Build CloudFront distribution configuration
+        distribution_props = {
+            "default_behavior": cloudfront.BehaviorOptions(
                 origin=origins.S3Origin(
                     website_bucket,
                     origin_access_identity=origin_access_identity
@@ -221,10 +148,8 @@ class StockTrackerStack(Stack):
                 cached_methods=cloudfront.CachedMethods.CACHE_GET_HEAD,
                 compress=True
             ),
-            default_root_object="index.html",
-            # Attach WAF WebACL
-            web_acl_id=waf_web_acl.attr_arn,
-            error_responses=[
+            "default_root_object": "index.html",
+            "error_responses": [
                 cloudfront.ErrorResponse(
                     http_status=404,
                     response_http_status=200,
@@ -232,8 +157,17 @@ class StockTrackerStack(Stack):
                     ttl=Duration.minutes(5)
                 )
             ],
-            price_class=cloudfront.PriceClass.PRICE_CLASS_100,
-            comment="EPAM Stock Tracker Distribution"
+            "price_class": cloudfront.PriceClass.PRICE_CLASS_100,
+            "comment": "EPAM Stock Tracker Distribution"
+        }
+        
+        # Add WAF if ARN is provided
+        if waf_acl_arn:
+            distribution_props["web_acl_id"] = waf_acl_arn
+
+        distribution = cloudfront.Distribution(
+            self, "WebsiteDistribution",
+            **distribution_props
         )
 
         # ========================================
@@ -361,12 +295,6 @@ class StockTrackerStack(Stack):
             self, "ApiUrlForConfig",
             value=f"{api.url}?url=",
             description="Use this as the proxy URL in api.js (replace http://localhost:8080?url=)"
-        )
-        
-        CfnOutput(
-            self, "WAFWebACLArn",
-            value=waf_web_acl.attr_arn,
-            description="WAF WebACL ARN (rate limiting + basic protection enabled)"
         )
         
         CfnOutput(
