@@ -165,6 +165,28 @@ class TestPythonSyntax(unittest.TestCase):
                     self.fail(f"Syntax error in {file_path}: {e}")
 
 
+class TestAPIGatewayConfiguration(unittest.TestCase):
+    """Test API Gateway configuration"""
+    
+    def test_cloudwatch_role_exists(self):
+        """API Gateway should have CloudWatch Logs role configured"""
+        stack_path = repo_root / 'infrastructure' / 'cdk' / 'stacks' / 'stock_tracker_stack.py'
+        with open(stack_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Check for CloudWatch role creation
+        self.assertIn('ApiGatewayCloudWatchRole', content,
+                     "API Gateway CloudWatch role should be created")
+        
+        # Check for CfnAccount resource
+        self.assertIn('CfnAccount', content,
+                     "CfnAccount should be used to set CloudWatch role")
+        
+        # Check for the managed policy
+        self.assertIn('AmazonAPIGatewayPushToCloudWatchLogs', content,
+                     "Should use AmazonAPIGatewayPushToCloudWatchLogs policy")
+
+
 class TestWorkflowConfiguration(unittest.TestCase):
     """Test GitHub Actions workflow configuration"""
     

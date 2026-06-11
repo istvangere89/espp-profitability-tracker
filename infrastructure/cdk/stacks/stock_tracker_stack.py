@@ -52,6 +52,28 @@ class StockTrackerStack(Stack):
         )
 
         # ========================================
+        # API Gateway CloudWatch Role (Account-level)
+        # ========================================
+        # API Gateway needs a CloudWatch Logs role at the account level
+        # This is a one-time setup, but we create it here for automation
+        cloudwatch_role = iam.Role(
+            self, "ApiGatewayCloudWatchRole",
+            assumed_by=iam.ServicePrincipal("apigateway.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name(
+                    "service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+                )
+            ]
+        )
+
+        # Set the CloudWatch Logs role for API Gateway account settings
+        # This is idempotent and only needs to be done once per region
+        apigateway.CfnAccount(
+            self, "ApiGatewayAccount",
+            cloud_watch_role_arn=cloudwatch_role.role_arn
+        )
+
+        # ========================================
         # API Gateway for Lambda with Throttling
         # ========================================
         api = apigateway.RestApi(
