@@ -61,18 +61,36 @@ For a production deployment with global CDN and serverless backend:
 python scripts/check_aws_setup.py
 ```
 
-**Then deploy:**
+**Option A: Automated Deployment (GitHub Actions - Recommended)**
+
+Push to `main` branch to automatically deploy:
+```bash
+git push origin main
+```
+
+GitHub Actions will automatically:
+- ✅ Run all tests
+- ✅ Deploy infrastructure using CDK
+- ✅ Update frontend with API Gateway URL
+- ✅ Deploy to CloudFront/S3
+
+**Setup:** See [.github/workflows/README.md](.github/workflows/README.md) for OIDC role setup.
+
+**Option B: Manual Deployment (CLI)**
+
+Deploy manually from your machine:
 ```bash
 python scripts/deploy.py
 ```
 
-This deploys to AWS with:
+**Deployment includes:**
 - ☁️ CloudFront CDN for global access
 - 🔒 HTTPS enabled automatically
 - ⚡ Lambda-based CORS proxy (no local server needed)
 - �️ WAF protection (rate limiting + DDoS prevention)
 - 📊 CloudWatch monitoring and alarms
 - 🚦 API throttling (optimized for 10-25 users)
+- 🌍 Region: eu-central-1 (Frankfurt)
 - 💰 Free tier eligible (~$6-11/month with WAF, $1-3/month without)
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.

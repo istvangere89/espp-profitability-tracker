@@ -2,6 +2,32 @@
 
 This guide explains how to deploy the EPAM Stock Tracker to AWS using CDK.
 
+## 🎯 Deployment Options
+
+### Option 1: Automated GitHub Actions (Recommended)
+
+The easiest way to deploy is using GitHub Actions CI/CD:
+
+**Benefits:**
+- ✅ Fully automated on push to `main`
+- ✅ Runs tests before deployment
+- ✅ No local setup required
+- ✅ Consistent deployments
+- ✅ Deployment history tracked
+
+**Setup Steps:**
+1. Create OIDC role in AWS
+2. Add `AWS_GITHUB_ROLE_ARN` secret to GitHub
+3. Push to `main` branch
+
+**See:** [.github/workflows/README.md](../.github/workflows/README.md) for complete setup instructions.
+
+**Target Region:** eu-central-1 (Frankfurt)
+
+### Option 2: Manual CLI Deployment
+
+Deploy from your local machine using the deployment script.
+
 ## 📋 Prerequisites
 
 1. **AWS Account** - You need an AWS account ([sign up here](https://aws.amazon.com/))
