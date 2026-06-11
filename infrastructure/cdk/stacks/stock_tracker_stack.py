@@ -133,11 +133,11 @@ class StockTrackerStack(Stack):
         # ========================================
         # S3 Bucket for Static Website
         # ========================================
+        # Note: When using OAC, bucket should NOT be configured as a website
+        # CloudFront serves files directly from S3 using OAC
         website_bucket = s3.Bucket(
             self, "WebsiteBucket",
             bucket_name=f"epam-stock-tracker-{self.account}",
-            website_index_document="index.html",
-            website_error_document="index.html",
             public_read_access=False,
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=RemovalPolicy.DESTROY,
@@ -145,16 +145,24 @@ class StockTrackerStack(Stack):
         )
 
         # ========================================
-        # CloudFront Distribution
+        # CloudFront Distribution with OAC
         # ========================================
-        # Note: WAF for CloudFront requires us-east-1 region
-        # Since we're deploying to eu-central-1, WAF is disabled
-        # To enable WAF, you would need a separate stack in us-east-1
+        # Create Origin Access Control (OAC) for secure S3 access
+        oac = cloudfront.S3OriginAccessControl(
+            self, "OAC",
+            signing=cloudfront.Signing.SIGV4_NO_OVERRIDE
+        )
+        
+        # Create S3 origin with OAC
+        s3_origin = origins.S3BucketOrigin.with_origin_access_control(
+            website_bucket,
+            origin_access_control=oac
+        )
 
         # Build CloudFront distribution configuration
         distribution_props = {
             "default_behavior": cloudfront.BehaviorOptions(
-                origin=origins.S3BucketOrigin(website_bucket),
+                origin=s3_origin,
                 viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                 allowed_methods=cloudfront.AllowedMethods.ALLOW_GET_HEAD,
                 cached_methods=cloudfront.CachedMethods.CACHE_GET_HEAD,
@@ -181,8 +189,6 @@ class StockTrackerStack(Stack):
             self, "WebsiteDistribution",
             **distribution_props
         )
-
-        # Note: S3BucketOrigin automatically creates OAC and sets up bucket permissions
 
         # ========================================
         # Deploy Website Files to S3
