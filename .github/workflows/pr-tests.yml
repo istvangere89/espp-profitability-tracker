@@ -12,6 +12,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.11'
+  NODE_VERSION: '24'
 
 jobs:
   test:
@@ -51,6 +52,11 @@ jobs:
           echo "🧪 Testing Lambda handler..."
           python scripts/test_lambda.py
           echo "✅ Lambda tests passed!"
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
       
       - name: Validate CDK Synth
         run: |

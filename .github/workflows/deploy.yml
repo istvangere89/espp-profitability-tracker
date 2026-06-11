@@ -9,7 +9,7 @@ on:
 env:
   AWS_REGION: eu-central-1
   PYTHON_VERSION: '3.11'
-  NODE_VERSION: '18'
+  NODE_VERSION: '24'
 
 # Required for OIDC authentication
 permissions:
@@ -68,8 +68,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: infrastructure/cdk/package-lock.json
       
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4

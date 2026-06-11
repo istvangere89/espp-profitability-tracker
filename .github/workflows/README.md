@@ -23,7 +23,7 @@ This directory contains automated CI/CD workflows for the EPAM Stock Tracker.
 **Environment:**
 - Region: `eu-central-1`
 - Python: `3.11`
-- Node.js: `18`
+- Node.js: `24`
 
 **Outputs:**
 - Deployment outputs saved as artifacts
@@ -136,7 +136,7 @@ The workflows use these environment variables:
 |----------|-------|---------|
 | `AWS_REGION` | `eu-central-1` | AWS region for deployment |
 | `PYTHON_VERSION` | `3.11` | Python version for builds |
-| `NODE_VERSION` | `18` | Node.js version for CDK |
+| `NODE_VERSION` | `24` | Node.js version for CDK |
 
 ## Security
 
