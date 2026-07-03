@@ -108,8 +108,7 @@ jobs:
       - name: CDK Bootstrap (if needed)
         working-directory: infrastructure/cdk
         run: |
-          # Bootstrap both regions (us-east-1 for WAF, eu-central-1 for main stack)
-          cdk bootstrap aws://unknown-account/us-east-1 || true
+          # Bootstrap main region only
           cdk bootstrap aws://unknown-account/${{ env.AWS_REGION }} || true
       
       - name: CDK Synth
@@ -120,7 +119,7 @@ jobs:
       - name: CDK Deploy
         working-directory: infrastructure/cdk
         run: |
-          cdk deploy --all --require-approval never --outputs-file outputs.json
+          cdk deploy EpamStockTrackerStack --require-approval never --outputs-file outputs.json
       
       - name: Update API endpoint in frontend
         run: |

@@ -62,77 +62,6 @@ class TestCDKAssetPaths(unittest.TestCase):
                        f"index.html not found in {src_path}")
 
 
-class TestWAFConfiguration(unittest.TestCase):
-    """Test WAF configuration for common issues"""
-    
-    def test_waf_description_validation(self):
-        """WAF description must match AWS regex pattern"""
-        # Pattern from AWS: ^[\w+=:#@/\-,\.][\w+=:#@/\-,\.\s]+[\w+=:#@/\-,\.]$
-        aws_pattern = r'^[\w+=:#@/\-,\.][\w+=:#@/\-,\.\s]+[\w+=:#@/\-,\.]$'
-        
-        # Read actual description from waf_stack.py
-        waf_stack_path = repo_root / 'infrastructure' / 'cdk' / 'stacks' / 'waf_stack.py'
-        with open(waf_stack_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        # Extract description
-        desc_match = re.search(r'description="([^"]+)"', content)
-        self.assertIsNotNone(desc_match, "WAF description not found in waf_stack.py")
-        
-        description = desc_match.group(1)
-        
-        # Validate description
-        self.assertIsNotNone(re.match(aws_pattern, description),
-                            f"WAF description '{description}' doesn't match AWS pattern")
-        
-        # Ensure no parentheses (common mistake)
-        self.assertNotIn('(', description, "WAF description contains '(' which is not allowed")
-        self.assertNotIn(')', description, "WAF description contains ')' which is not allowed")
-    
-    def test_waf_property_names(self):
-        """Check for correct WAF property names (RateBasedStatement not RatBasedStatement)"""
-        waf_stack_path = repo_root / 'infrastructure' / 'cdk' / 'stacks' / 'waf_stack.py'
-        with open(waf_stack_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        # Check for typo
-        self.assertNotIn('RatBasedStatement', content,
-                        "Found typo 'RatBasedStatement' - should be 'RateBasedStatement'")
-        
-        # Check correct spelling exists
-        self.assertIn('RateBasedStatement', content,
-                     "RateBasedStatement not found in waf_stack.py")
-
-
-class TestCrossRegionConfiguration(unittest.TestCase):
-    """Test cross-region configuration for WAF"""
-    
-    def test_waf_stack_region_is_us_east_1(self):
-        """WAF stack must be in us-east-1 for CloudFront"""
-        app_py_path = repo_root / 'infrastructure' / 'cdk' / 'app.py'
-        with open(app_py_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        # Check that WAF stack has us-east-1
-        waf_section = re.search(r'WafStack\(.*?env=.*?\)', content, re.DOTALL)
-        self.assertIsNotNone(waf_section, "WafStack definition not found")
-        
-        waf_text = waf_section.group(0)
-        self.assertIn('us-east-1', waf_text,
-                     "WAF stack must be deployed to us-east-1 for CloudFront")
-    
-    def test_cross_region_references_enabled(self):
-        """Cross-region references must be enabled for both stacks"""
-        app_py_path = repo_root / 'infrastructure' / 'cdk' / 'app.py'
-        with open(app_py_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        # Check both stacks have cross_region_references=True
-        # Use more flexible regex that handles multiline
-        self.assertIn('cross_region_references=True', content,
-                     "Both stacks should have cross_region_references=True enabled")
-
-
 class TestPythonSyntax(unittest.TestCase):
     """Test Python files for syntax errors"""
     
@@ -146,7 +75,6 @@ class TestPythonSyntax(unittest.TestCase):
             'infrastructure/cdk/app.py',
             'infrastructure/cdk/stacks/__init__.py',
             'infrastructure/cdk/stacks/stock_tracker_stack.py',
-            'infrastructure/cdk/stacks/waf_stack.py',
             'infrastructure/lambda/cors_proxy/index.py'
         ]
         
@@ -219,15 +147,15 @@ class TestWorkflowConfiguration(unittest.TestCase):
             self.assertNotIn('secrets.AWS_GITHUB_ROLE_ARN', content,
                            "Workflow should use vars not secrets for role ARN")
     
-    def test_workflow_deploys_all_stacks(self):
-        """Workflow should deploy all stacks (--all flag)"""
+    def test_workflow_deploys_stack(self):
+        """Workflow should deploy the main stack"""
         workflow_path = repo_root / '.github' / 'workflows' / 'deploy.yml'
         with open(workflow_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # Check for --all flag in deploy command
-        self.assertIn('cdk deploy --all', content,
-                     "Workflow should use 'cdk deploy --all' to deploy both stacks")
+        # Check for deploy command
+        self.assertIn('cdk deploy', content,
+                     "Workflow should use 'cdk deploy' to deploy the stack")
 
 
 def run_tests():
