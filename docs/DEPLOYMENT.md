@@ -80,7 +80,8 @@ This script will:
    - Global CDN for fast content delivery
    - HTTPS enabled by default
    - Caches your website globally
-   - **WAF Protection**: Rate limiting + protection against common exploits
+   - **Geographic Restriction**: Access limited to Hungary only (FREE)
+   - **DDoS Protection**: AWS Shield Standard included (FREE)
 
 3. **Lambda Function**
    - Replaces the local Python proxy server
@@ -95,11 +96,12 @@ This script will:
    - Pay-per-request pricing
    - Optional server-side caching (disabled by default to avoid costs)
 
-5. **AWS WAF (Web Application Firewall)**
-   - **Rate Limiting**: 100 requests per 5 minutes per IP address
-   - **AWS Managed Rules**: Protection against common web exploits
-   - **Known Bad Inputs**: Blocks malicious request patterns
-   - Cost: ~$5-10/month + $0.60 per million requests
+5. **Security Features (All FREE)**
+   - **Geographic Restriction**: CloudFront blocks all non-Hungary traffic
+   - **DDoS Protection**: AWS Shield Standard (Layer 3/4 protection)
+   - **Rate Limiting**: API Gateway throttling prevents abuse
+   - **HTTPS**: Enforced on all connections
+   - Cost: $0/month
 
 6. **CloudWatch Alarms**
    - Monitors API Gateway throttling
@@ -128,14 +130,14 @@ This script will:
 - **Lambda**: 1M requests free per month, then $0.20 per 1M
 - **API Gateway**: 1M requests free for 12 months, then $3.50 per 1M
 - **S3**: ~$0.023 per GB storage
-- **WAF**: $5/month + $1 per rule + $0.60 per 1M requests
+- **Security Features**: $0/month (all using free AWS features)
 - **CloudWatch Alarms**: 10 free alarms, then $0.10/alarm/month
 
 **Expected cost for 10-25 users:**
-- **First year**: ~$5-8/month (free tier covers most costs, WAF is main cost)
-- **After first year**: ~$8-12/month (includes all services)
+- **First year**: ~$0.15/month (free tier covers almost everything)
+- **After first year**: ~$1-2/month (minimal traffic charges)
 
-**Without WAF**: ~$1-3/month (if you prefer minimal cost, comment out WAF in CDK)
+**Cost optimization applied**: Removed AWS WAF ($7/month) in favor of free CloudFront geo-restriction and AWS Shield Standard.
 
 ## 📝 Manual Deployment Steps
 

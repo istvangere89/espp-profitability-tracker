@@ -1,10 +1,16 @@
 """
 CDK Stack for EPAM Stock Tracker
 - S3 bucket for static website hosting
-- CloudFront distribution
+- CloudFront distribution with geo-restriction (Hungary only)
+- AWS Shield Standard (FREE) for DDoS protection
 - Lambda function for CORS proxy
 - API Gateway with throttling (10-25 users)
 - CloudWatch alarms for monitoring
+
+Security Features (All FREE):
+- Geographic restriction to Hungary via CloudFront
+- DDoS protection via AWS Shield Standard (included with CloudFront)
+- Rate limiting via API Gateway throttling
 """
 
 from aws_cdk import (
@@ -17,8 +23,6 @@ from aws_cdk import (
     aws_apigateway as apigateway,
     aws_iam as iam,
     aws_cloudwatch as cloudwatch,
-    aws_cloudwatch_actions as cw_actions,
-    aws_sns as sns,
     CfnOutput,
     RemovalPolicy,
     Duration
@@ -27,7 +31,7 @@ from constructs import Construct
 
 
 class StockTrackerStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, waf_acl_arn: str = None, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # ========================================
@@ -140,35 +144,35 @@ class StockTrackerStack(Stack):
             origin_access_control=oac
         )
 
-        # Build CloudFront distribution configuration
-        distribution_props = {
-            "default_behavior": cloudfront.BehaviorOptions(
+        # Build CloudFront distribution with geo-restriction (Hungary only)
+        distribution = cloudfront.Distribution(
+            self, "WebsiteDistribution",
+            default_behavior=cloudfront.BehaviorOptions(
                 origin=s3_origin,
                 viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                 allowed_methods=cloudfront.AllowedMethods.ALLOW_GET_HEAD,
                 cached_methods=cloudfront.CachedMethods.CACHE_GET_HEAD,
                 compress=True
             ),
-            "default_root_object": "index.html",
-            "error_responses": [
+            default_root_object="index.html",
+            error_responses=[
                 cloudfront.ErrorResponse(
                     http_status=404,
                     response_http_status=200,
                     response_page_path="/index.html",
                     ttl=Duration.minutes(5)
+                ),
+                cloudfront.ErrorResponse(
+                    http_status=403,
+                    response_http_status=403,
+                    response_page_path="/index.html",
+                    ttl=Duration.minutes(5)
                 )
             ],
-            "price_class": cloudfront.PriceClass.PRICE_CLASS_100,
-            "comment": "EPAM Stock Tracker Distribution"
-        }
-        
-        # Add WAF if ARN is provided
-        if waf_acl_arn:
-            distribution_props["web_acl_id"] = waf_acl_arn
-
-        distribution = cloudfront.Distribution(
-            self, "WebsiteDistribution",
-            **distribution_props
+            price_class=cloudfront.PriceClass.PRICE_CLASS_100,
+            # Geographic restriction - Allow only Hungary (FREE feature)
+            geo_restriction=cloudfront.GeoRestriction.allowlist("HU"),
+            comment="EPAM Stock Tracker Distribution - Hungary only, protected by AWS Shield Standard"
         )
 
         # ========================================
