@@ -7,6 +7,7 @@ Welcome to the `netlify-migration` branch! This branch contains all the changes 
 **Branch:** `netlify-migration`  
 **Status:** ✅ Ready for deployment  
 **Cost Reduction:** $11.50/month → $0/month  
+**Deployment Method:** Netlify native (automatic GitHub integration)
 
 ## 📝 Changes Summary
 
@@ -16,9 +17,16 @@ Welcome to the `netlify-migration` branch! This branch contains all the changes 
 ### New Files
 - ✅ `netlify.toml` - Netlify site configuration
 - ✅ `netlify/functions/cors-proxy.js` - Netlify Function for CORS proxy
-- ✅ `.github/workflows/deploy-netlify.yml` - GitHub Actions workflow
 - ✅ `docs/NETLIFY_MIGRATION.md` - Complete migration guide
-- ✅ `.github/workflows/NETLIFY_DEPLOYMENT_GUIDE.md` - Workflow setup guide
+- ✅ `docs/NETLIFY_SIMPLE_DEPLOYMENT.md` - Simple native deployment guide
+
+### Why No GitHub Actions?
+We're using **Netlify's native GitHub integration** instead:
+- ✅ Simpler (no workflow file needed)
+- ✅ Faster (direct GitHub → Netlify connection)
+- ✅ No secrets to configure
+- ✅ Automatic deploys on every push
+- ✅ Built-in monitoring and rollback
 
 ### Removed (after this deploys)
 - AWS infrastructure files can be archived/deleted
@@ -33,56 +41,60 @@ Welcome to the `netlify-migration` branch! This branch contains all the changes 
 # 1. Switch to this branch
 git checkout netlify-migration
 
-# 2. Install Netlify CLI
+# 2. Install Netlify CLI (optional, for local testing)
 npm install -g netlify-cli
 
-# 3. Start local dev server
-cd /path/to/espp-profitability-tracker
+# 3. Start local dev server to test
 netlify dev
 
 # 4. Open http://localhost:8888 in browser
 ```
 
-### For Deployment (GitHub Actions)
+### For Deployment (Netlify Native - Simplest!)
 
-**Prerequisites:**
-1. Create Netlify account: https://app.netlify.com
-2. Connect repository to Netlify
-3. Add GitHub secrets (see step-by-step below)
+**No GitHub Actions needed. Just Netlify's automatic GitHub integration.**
 
-**Setup Steps:**
+**Setup Steps (5 minutes):**
 
-1. **Get Netlify Auth Token:**
-   - Go to https://app.netlify.com/user/applications/personal
-   - Click "New access token"
-   - Copy the token
+1. **Create Netlify Account:**
+   - Go to https://app.netlify.com
+   - Sign up with GitHub
+   - Authorize GitHub access
 
-2. **Add to GitHub Secrets:**
-   - Go to: https://github.com/istvangere89/espp-profitability-tracker/settings/secrets/actions
-   - Add secret `NETLIFY_AUTH_TOKEN` with your token
-   - Add secret `NETLIFY_SITE_ID` with your site ID
+2. **Connect Your Repository:**
+   - Click "Add new site" → "Import an existing project"
+   - Choose "GitHub"
+   - Select: `istvangere89/espp-profitability-tracker`
+   - Choose branch: `netlify-migration`
+   - Configure:
+     - Build command: (leave empty)
+     - Publish directory: `src`
+     - Functions directory: `netlify/functions`
+   - Click "Deploy site"
 
-3. **Trigger Deployment:**
-   - Push to this branch: `git push origin netlify-migration`
-   - Or manually run workflow from Actions tab
-   - GitHub Actions automatically deploys!
+3. **Start Pushing Code!**
+   ```bash
+   git push origin netlify-migration
+   ```
+   - Netlify automatically deploys
+   - Watch status at: https://app.netlify.com
+   - App is live in ~2-3 minutes!
 
-**Detailed setup guide:** See `.github/workflows/NETLIFY_DEPLOYMENT_GUIDE.md`
+**That's it!** No secrets, no GitHub Actions, no complexity. Just push → auto-deploy!
 
 ---
 
 ## ✅ Pre-Deployment Checklist
 
-Before merging/deploying, verify:
+Before deploying, verify:
 
 - [ ] Netlify account created
-- [ ] Repository connected to Netlify
-- [ ] `NETLIFY_AUTH_TOKEN` secret added to GitHub
-- [ ] `NETLIFY_SITE_ID` secret added to GitHub
+- [ ] GitHub repository connected to Netlify
+- [ ] Build settings configured (publish: src, functions: netlify/functions)
 - [ ] Tested app locally (if possible)
 - [ ] All API endpoints updated to use `/.netlify/functions/cors-proxy`
 - [ ] No AWS references remain in `src/js/api.js`
-- [ ] No CORS errors in browser console
+- [ ] netlify.toml is present and valid
 
 ---
 
@@ -125,11 +137,12 @@ After workflow completes:
 
 ## 📚 Documentation
 
-### For Deployment Setup
-→ Read: `.github/workflows/NETLIFY_DEPLOYMENT_GUIDE.md`
-- Step-by-step GitHub secrets setup
-- Workflow configuration details
-- Troubleshooting guide
+### For Simple Native Deployment (Start Here!)
+→ Read: `docs/NETLIFY_SIMPLE_DEPLOYMENT.md`
+- Quick 3-step setup
+- Netlify native deployment (automatic)
+- No GitHub Actions needed
+- Monitoring and troubleshooting
 
 ### For Complete Migration Guide
 → Read: `docs/NETLIFY_MIGRATION.md`
@@ -138,37 +151,43 @@ After workflow completes:
 - Pre and post-deployment steps
 - AWS cleanup instructions
 
-### For Workflow Details
-→ Read: `.github/workflows/deploy-netlify.yml`
-- Workflow trigger conditions
-- Step-by-step execution
-- Error handling
+### For Branch Overview & Reference
+→ Read: `NETLIFY_MIGRATION_BRANCH.md`
+- Branch contents and status
+- Quick start guide
+- Performance benefits
+- Next steps
 
 ---
 
 ## 🔄 How It Works
 
-### GitHub Actions Workflow
-1. **On push to `netlify-migration`:**
-   - Runs syntax tests
-   - Validates Netlify configuration
-   - Deploys to Netlify automatically
+### Netlify Native Deployment
+1. **You push to `netlify-migration` branch**
+   ```bash
+   git push origin netlify-migration
+   ```
 
-2. **On pull request:**
-   - Runs syntax tests
-   - Comments with setup info
-   - Does NOT deploy (safe for review)
+2. **GitHub notifies Netlify**
+   - Netlify's GitHub integration detects new commits
 
-3. **Manual trigger:**
-   - Can manually run from Actions tab
-   - Useful for re-deploying if needed
+3. **Netlify automatically builds and deploys**
+   - Clones your repository
+   - Copies static files from `src/`
+   - Deploys functions from `netlify/functions/`
+   - Applies configuration from `netlify.toml`
 
-### Netlify Deployment
-1. Builds static site from `src/`
-2. Deploys Netlify Functions from `netlify/functions/`
-3. Applies caching and security headers
-4. Creates deployment preview
-5. Shows deployment status
+4. **Your site is live**
+   - View at your Netlify URL
+   - Check status in dashboard
+   - All completely automatic!
+
+### Why This Approach?
+- ✅ **Simpler:** No GitHub Actions workflow to manage
+- ✅ **Faster:** Direct GitHub → Netlify integration
+- ✅ **Secure:** No secrets to configure
+- ✅ **Automatic:** Every push = automatic deploy
+- ✅ **Built-in:** Netlify handles everything
 
 ---
 
@@ -256,23 +275,23 @@ Total:             $0/month
 
 ## 🎯 Next Steps
 
-### Immediate (Before Deployment)
+### Immediate (Before Deployment - 5 minutes)
 1. Create Netlify account
 2. Connect GitHub repo to Netlify
-3. Add GitHub secrets
-4. (Optional) Test locally with `netlify dev`
+3. Configure build settings (3 fields: build command, publish dir, functions dir)
+4. Let Netlify do the rest!
 
-### Deployment
-1. Verify all checks above pass
-2. Push to `netlify-migration` branch
-3. Watch GitHub Actions deploy
-4. Test on Netlify URL
+### Deployment (1 minute)
+1. Push to `netlify-migration` branch: `git push origin netlify-migration`
+2. Netlify automatically builds and deploys
+3. Watch: https://app.netlify.com
 
 ### After Deployment
-1. Create PR to merge `netlify-migration` → `main`
-2. Review changes
-3. Merge to `main`
-4. All future deployments automatic
+1. Test on Netlify URL
+2. Verify all features work
+3. Create PR to merge `netlify-migration` → `main`
+4. Review and merge
+5. All future deployments automatic!
 
 ### Cleanup (Optional)
 1. Archive AWS infrastructure code
