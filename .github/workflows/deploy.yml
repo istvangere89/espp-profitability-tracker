@@ -1,10 +1,13 @@
-name: Deploy to AWS
+name: DEPRECATED - Deploy to AWS (No Longer Used)
+
+# ⚠️ DEPRECATED: This workflow is no longer used
+# The application is now deployed to Netlify with automatic deployments
+# See: NETLIFY_DEPLOYMENT_SETUP.md and docs/NETLIFY_MIGRATION.md
+#
+# This workflow has been disabled - to re-enable, add "push" trigger back below
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:  # Allow manual trigger only (disabled automatic deployment)
 
 env:
   AWS_REGION: eu-central-1
