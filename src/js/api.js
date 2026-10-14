@@ -24,10 +24,10 @@ const API = {
         }
 
         try {
-            // Method 1: Try Yahoo Finance query via local proxy
+            // Method 1: Try Yahoo Finance query via Netlify CORS proxy function
             const symbol = 'EPAM';
             const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`;
-            const proxyUrl = `https://5m16c2qhoc.execute-api.eu-central-1.amazonaws.com/prod/?url=${encodeURIComponent(yahooUrl)}`;
+            const proxyUrl = `/.netlify/functions/cors-proxy?url=${encodeURIComponent(yahooUrl)}`;
             const response = await fetch(proxyUrl, {
                 method: 'GET'
             });
